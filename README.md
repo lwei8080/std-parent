@@ -1,2 +1,2 @@
 # std-parent
-learn
+test
