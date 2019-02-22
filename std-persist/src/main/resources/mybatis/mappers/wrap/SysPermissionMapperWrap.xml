@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.std.persist.mysql.dao.wrap.ISysPermissionDaoWrap" >
+  <resultMap id="BaseResultMap" type="com.std.persist.model.wrap.SysPermissionWrap" extends="com.std.persist.mysql.dao.ISysPermissionDao.BaseResultMap">
+  	<result column="s_parent_name" jdbcType="VARCHAR" property="parentName" />
+  </resultMap>
+  <select id="selectByRoles" resultMap="com.std.persist.mysql.dao.ISysPermissionDao.BaseResultMap" parameterType="map" >
+	select 
+	p.* 
+	from `sys-role-permission` rp, `sys-permission` p, `sys-role` r 
+	where rp.n_permission_id = p.n_id and rp.n_role_id = r.n_id 
+	<if test="state != null">
+		and p.n_state = #{state} 
+	</if>
+	and r.n_id in ( 
+	    <foreach collection="roles" item="role" index="index" separator=",">
+	    	#{role.id,jdbcType=INTEGER}
+	    </foreach>
+    )
+  </select>
+  <select id="getSysPermissionByPage" resultMap="BaseResultMap" parameterType="map">
+	select p1.*,p2.s_name as s_parent_name 
+	from `sys-permission` p1
+	left join `sys-permission` p2 on p1.n_parent_id = p2.n_id 
+    <where>
+        <if test="url != null">
+            and p1.s_url LIKE CONCAT('%',#{url,jdbcType=VARCHAR}, '%')
+        </if>
+        <if test="permissions != null">
+            and p1.s_permissions LIKE CONCAT('%',#{permissions,jdbcType=VARCHAR}, '%')
+        </if>
+        <if test="type != null">
+            and p1.n_type = #{type,jdbcType=INTEGER}
+        </if>
+        <if test="state != null">
+            and p1.n_state = #{state,jdbcType=INTEGER}
+        </if>
+    </where>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+</mapper>

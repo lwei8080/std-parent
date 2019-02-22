@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.std.persist.mysql.dao.wrap.ISysManagerDaoWrap">
+  <select id="getSysManagerByPage" resultMap="com.std.persist.mysql.dao.ISysManagerDao.BaseResultMap" parameterType="map">
+	select * 
+	from `sys-manager` 
+    <where>
+        <if test="account != null">
+            and s_account LIKE CONCAT('%',#{account,jdbcType=VARCHAR}, '%')
+        </if>
+        <if test="name != null">
+            and s_name LIKE CONCAT('%',#{name,jdbcType=VARCHAR}, '%')
+        </if>
+        <if test="mobile != null">
+            and s_mobile = #{mobile,jdbcType=VARCHAR}
+        </if>
+        <if test="state != null">
+            and n_state = #{state,jdbcType=INTEGER}
+        </if>
+    </where>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="getSysDate" resultType="java.util.Date">
+  	select now() 
+  </select>
+</mapper>

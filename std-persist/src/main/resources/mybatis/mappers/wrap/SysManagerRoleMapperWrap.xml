@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.std.persist.mysql.dao.wrap.ISysManagerRoleDaoWrap" >
+  <resultMap id="BaseResultMap" type="com.std.persist.model.wrap.SysManagerRoleWrap" extends="com.std.persist.mysql.dao.ISysManagerRoleDao.BaseResultMap">
+    <association property="manager" resultMap="com.std.persist.mysql.dao.ISysManagerDao.BaseResultMap" columnPrefix="m_" />
+  	<association property="role" resultMap="com.std.persist.mysql.dao.ISysRoleDao.BaseResultMap" columnPrefix="r_" /> 
+  </resultMap>
+  
+  <select id="getSysManagerRoleByPage" resultMap="BaseResultMap" parameterType="map">
+	select mr.*,
+	m.n_id m_n_id, m.s_account m_s_account, m.s_mobile m_s_mobile, m.n_state m_n_state, m.d_create_date m_d_create_date, m.s_name m_s_name,
+	r.n_id r_n_id, r.s_name r_s_name, r.s_description r_s_description, r.d_create_date r_d_create_date
+	from `sys-manager-role` mr, `sys-manager` m, `sys-role` r
+	where mr.n_manager_id = m.n_id and mr.n_role_id = r.n_id 
+    <if test="account != null">
+      and m.s_account LIKE CONCAT('%',#{account,jdbcType=VARCHAR}, '%')
+    </if>
+    <if test="managerState != null">
+      and m.n_state = #{managerState,jdbcType=INTEGER}
+    </if>
+    <if test="roleName != null">
+      and r.s_name LIKE CONCAT('%',#{roleName,jdbcType=VARCHAR}, '%')
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  
+  <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id" >
+    insert into `sys-manager-role` (n_manager_id, n_role_id)
+    values 
+    <foreach collection="list" item="item" index="index" separator=",">
+    	(#{item.managerId,jdbcType=INTEGER}, #{item.roleId,jdbcType=INTEGER})
+    </foreach>
+  </insert>
+</mapper>

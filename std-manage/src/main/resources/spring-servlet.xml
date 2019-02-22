@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:oxm="http://www.springframework.org/schema/oxm"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:websocket="http://www.springframework.org/schema/websocket"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd  
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd  
+    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd  
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd  
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd  
+    http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
+    http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm-4.1.xsd
+    http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.1.xsd"
+	default-autowire="byName">
+	<!-- @value取值 ${}引用属性值 -->
+	<context:property-placeholder ignore-unresolvable="true" location="classpath:application.properties" />
+	<!-- 激活mvc 注解模式 -->
+	<mvc:annotation-driven>
+		<!-- 处理responseBody 里面日期类型 -->
+		<mvc:message-converters>
+			<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+				<property name="objectMapper">
+					<bean class="com.fasterxml.jackson.databind.ObjectMapper">
+						<property name="dateFormat">
+							<bean class="java.text.SimpleDateFormat">
+								<constructor-arg type="java.lang.String" value="yyyy-MM-dd HH:mm:ss" />
+							</bean>
+						</property>
+					</bean>
+				</property>
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+	<!-- 开启注解处理器 -->
+	<context:annotation-config />
+	<!-- 开启组件扫描 -->
+	<context:component-scan base-package="com.std.manage" />
+	<!-- 静态资源目录 -->
+	<mvc:resources mapping="/resources/**" location="/resources/" />
+	<!-- 针对FreeMarker的视图解析 -->
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
+		<property name="cache" value="false" />
+		<property name="prefix" value="" />
+		<property name="suffix" value=".ftl" />
+		<property name="contentType" value="text/html;charset=utf-8" />
+		<property name="requestContextAttribute" value="request" />
+		<property name="exposeSpringMacroHelpers" value="true" />
+		<property name="exposeRequestAttributes" value="true" />
+		<property name="exposeSessionAttributes" value="true" />
+	</bean>
+	<!-- FreeMarker配置 -->
+	<bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+		<property name="templateLoaderPath" value="/WEB-INF/templates" />
+		<property name="freemarkerSettings">
+			<props>
+				<prop key="template_update_delay">0</prop>
+				<prop key="default_encoding">utf-8</prop>
+				<prop key="output_encoding">utf-8</prop>
+				<prop key="locale">zh_CN</prop>
+				<prop key="number_format">0.##########</prop>
+				<prop key="datetime_format">yyyy-MM-dd HH:mm:ss</prop>
+				<prop key="date_format">yyyy-MM-dd</prop>
+				<prop key="time_format">HH:mm:ss</prop>
+				<prop key="boolean_format">true,false</prop>
+				<prop key="whitespace_stripping">true</prop>
+				<prop key="tag_syntax">auto_detect</prop>
+				<prop key="url_escaping_charset">utf-8</prop>
+				<prop key="classic_compatible">true</prop>
+				<prop key="template_exception_handler">ignore</prop>
+			</props>
+		</property>
+	</bean>
+	<!-- 验证码生成器  默认为DefaultKaptcha -->
+	<bean id="captchaProducer" class="com.google.code.kaptcha.impl.DefaultKaptcha">
+		<property name="config">
+			<bean class="com.std.manage.support.kaptcha.KaptchaConfig">
+				<constructor-arg>
+					<props>
+						<!-- 是否有边框  默认为true  我们可以自己设置yes，no  -->
+						<prop key="kaptcha.border">yes</prop>
+						<!-- 边框颜色   默认为Color.BLACK -->
+						<prop key="kaptcha.border.color">0,0,0</prop>
+						<!-- 边框粗细度  默认为1 -->
+						<prop key="kaptcha.border.thickness">1</prop>
+						<!-- 验证码图片宽度  默认为200 -->
+						<prop key="kaptcha.image.width">150</prop>
+						<!-- 验证码图片高度  默认为50 -->
+						<prop key="kaptcha.image.height">45</prop>
+						<!-- 验证码文本生成器  默认为DefaultTextCreator -->
+						<prop key="kaptcha.textproducer.impl">
+							com.google.code.kaptcha.text.impl.DefaultTextCreator,
+							com.std.manage.support.kaptcha.ChineseIdiomsProducer
+						</prop>
+						<!-- 验证码文本字符内容范围  默认为abcde2345678gfynmnpwx -->
+						<prop key="kaptcha.textproducer.char.string">ABCEHJKLMNRSTUWXY235689</prop>
+						<!-- 验证码文本字符颜色  默认为Color.BLACK  -->
+						<prop key="kaptcha.textproducer.font.color">black</prop>
+						<!-- 验证码文本字符大小  默认为40  -->
+						<prop key="kaptcha.textproducer.font.size">36</prop>
+						<!-- 验证码文本字符长度  默认为5 -->
+						<prop key="kaptcha.textproducer.char.length">4</prop>
+						<!-- 验证码文本字符间距  默认为2 -->
+						<prop key="kaptcha.textproducer.char.space">1</prop>
+						<!-- 验证码文本字体样式  默认为new Font("Arial", 1, fontSize), new Font("Courier", 1, fontSize) -->
+						<prop key="kaptcha.textproducer.font.names">宋体,楷体,微软雅黑</prop>
+						<!-- 验证码噪点生成对象  默认为DefaultNoise -->
+						<!-- <prop key="kaptcha.noise.impl">com.google.code.kaptcha.impl.DefaultNoise</prop> -->
+						<prop key="kaptcha.noise.impl">com.std.manage.support.kaptcha.CustomNoise</prop>
+						<!-- 验证码噪点颜色   默认为Color.BLACK -->
+						<prop key="kaptcha.noise.color">black</prop>
+						<!-- 验证码文本字符渲染   默认为DefaultWordRenderer -->
+						<!-- <prop key="kaptcha.word.impl">com.google.code.kaptcha.text.impl.DefaultWordRenderer</prop> -->
+						<prop key="kaptcha.word.impl">com.std.manage.support.kaptcha.CustomWordRenderer</prop>
+						<!-- 验证码背景生成器   默认为DefaultBackground -->
+						<!-- <prop key="kaptcha.background.impl">com.google.code.kaptcha.impl.DefaultBackground</prop> -->
+						<prop key="kaptcha.background.impl">com.std.manage.support.kaptcha.CustomBackground</prop>
+						<!-- 验证码背景颜色渐进   默认为Color.LIGHT_GRAY -->
+						<prop key="kaptcha.background.clear.from">gray</prop>
+						<!-- 验证码背景颜色渐进   默认为Color.WHITE -->
+						<prop key="kaptcha.background.clear.to">white</prop>
+						<!-- 验证码样式引擎  默认为WaterRipple -->
+						<!-- 获取扭曲的不同风格的验证码，官方实现的有ShadowGimpy,FishEyeGimpy,WaterRipple,其中用来FishEyeGimpy之后上面设定的干扰线不起作用 -->
+						<prop key="kaptcha.obscurificator.impl">
+							com.google.code.kaptcha.impl.WaterRipple
+						</prop>
+					</props>
+				</constructor-arg>
+			</bean>
+		</property>
+	</bean>
+</beans>  

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.std.persist.mysql.dao.wrap.ISysRolePermissionDaoWrap" >
+  <resultMap id="BaseResultMap" type="com.std.persist.model.wrap.SysRolePermissionWrap" extends="com.std.persist.mysql.dao.ISysRolePermissionDao.BaseResultMap">
+  	<association property="role" resultMap="com.std.persist.mysql.dao.ISysRoleDao.BaseResultMap" columnPrefix="r_" /> 
+  	<association property="permission" resultMap="com.std.persist.mysql.dao.ISysPermissionDao.BaseResultMap" columnPrefix="p_" />
+  </resultMap>
+  
+  <select id="getSysRolePermissionByPage" resultMap="BaseResultMap" parameterType="map">
+	select rp.*,
+	p.n_id p_n_id,p.n_parent_id p_n_parent_id,p.s_name p_s_name,p.s_tag p_s_tag,p.s_url p_s_url,p.s_permissions p_s_permissions,p.s_class_icon p_s_class_icon,
+	p.n_order_num p_n_order_num,p.n_type p_n_type,p.d_create_date p_d_create_date,p.d_update_date p_d_update_date,p.n_state p_n_state,
+	r.n_id r_n_id,r.s_name r_s_name,r.s_description r_s_description,r.d_create_date r_d_create_date
+	from `sys-role-permission` rp, `sys-permission` p, `sys-role` r 
+	where rp.n_permission_id = p.n_id and rp.n_role_id = r.n_id 
+    <if test="roleName != null">
+      and r.s_name LIKE CONCAT('%',#{roleName,jdbcType=VARCHAR}, '%')
+    </if>
+    <if test="permissionName != null">
+      and p.s_name LIKE CONCAT('%',#{permissionName,jdbcType=VARCHAR}, '%')
+    </if>
+    <if test="url != null">
+      and p.s_url LIKE CONCAT('%',#{url,jdbcType=VARCHAR}, '%')
+    </if>
+    <if test="permissions != null">
+      and p.s_permissions LIKE CONCAT('%',#{permissions,jdbcType=VARCHAR}, '%')
+    </if>
+    <if test="state != null">
+      and p.n_state = #{state,jdbcType=INTEGER}
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  
+  <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id" >
+    insert into `sys-role-permission` (n_role_id, n_permission_id)
+    values 
+    <foreach collection="list" item="item" index="index" separator=",">
+    	(#{item.roleId,jdbcType=INTEGER}, #{item.permissionId,jdbcType=INTEGER})
+    </foreach>
+  </insert>
+</mapper>

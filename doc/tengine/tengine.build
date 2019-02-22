@@ -1,0 +1,18 @@
+yum install gcc pcre pcre-devel zlib zlib-devel openssl openssl-devel
+yum install jemalloc
+
+/usr/local/resources/soft/tengine-2.1.2
+
+tar -zxvf tengine-2.1.2.tar.gz
+
+./configure --prefix=/usr/local/resources/soft/tengine
+make && make install
+
+修改 /etc/profile  最后添加一行
+export PATH=/usr/local/resources/soft/tengine/sbin:$PATH
+//重启
+source /etc/profile
+
+
+添加开机启动
+echo "/usr/local/resources/soft/tengine/sbin/nginx" >>/etc/rc.local

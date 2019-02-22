@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.std.persist.mysql.dao.wrap.ISysRoleDaoWrap" >
+  <select id="selectByAccount" resultMap="com.std.persist.mysql.dao.ISysRoleDao.BaseResultMap" parameterType="map" >
+	select 
+	r.* 
+	from `sys-manager-role` mr, `sys-manager` m, `sys-role` r 
+	where mr.n_manager_id = m.n_id and mr.n_role_id = r.n_id and m.s_account = #{account,jdbcType=VARCHAR} 
+    <if test="state != null">
+    	and m.n_state = #{state,jdbcType=INTEGER}
+    </if>
+  </select>
+  <select id="getSysRoleByPage" resultMap="com.std.persist.mysql.dao.ISysRoleDao.BaseResultMap" parameterType="map">
+	select * 
+	from `sys-role` 
+    <where>
+        <if test="name != null">
+            and s_name LIKE CONCAT('%',#{name,jdbcType=VARCHAR}, '%')
+        </if>
+        <if test="description != null">
+            and s_description LIKE CONCAT('%',#{description,jdbcType=VARCHAR}, '%')
+        </if>
+    </where>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+</mapper>

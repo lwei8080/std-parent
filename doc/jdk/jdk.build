@@ -1,0 +1,12 @@
+tar -zxvf jdk-8u71-linux-x64.tar.gz
+cd jdk1.8.0_71/
+ln -s /usr/local/resources/soft/jdk1.8.0_71 /usr/local/jdk
+
+vi /etc/profile  (编辑一下配置，环境变量吧)
+
+export JAVA_HOME=/usr/local/jdk
+export JRE_HOME=/usr/local/jdk/jre
+export CLASSPATH=.:$JAVA_HOME/lib:$JRE_HOME/lib:$CLASSPATH
+export PATH=$JAVA_HOME/bin:$JRE_HOME/bin:$PATH
+
+source /etc/profile 

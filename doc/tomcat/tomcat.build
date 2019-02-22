@@ -1,0 +1,13 @@
+指定tomcat的jvm版本
+修改：
+catalina.sh  
+：
+export JAVA_HOME=/home/resources/jdk1.8.0_162
+export JRE_HOME=/home/resources/jdk1.8.0_162
+JAVA_OPTS="$JAVA_OPTS -server -Xms512m -Xmx2048m -Djava.awt.headless=true -Dfile.encoding=UTF8 -Dsun.jnu.encoding=UTF8"
+
+
+setclasspath.sh
+：
+export JAVA_HOME=/home/resources/jdk1.8.0_162
+export JRE_HOME=/home/resources/jdk1.8.0_162

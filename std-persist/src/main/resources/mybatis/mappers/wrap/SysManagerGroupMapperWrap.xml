@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.std.persist.mysql.dao.wrap.ISysManagerGroupDaoWrap">
+  <resultMap id="BaseResultMap" type="com.std.persist.model.wrap.SysManagerGroupWrap" extends="com.std.persist.mysql.dao.ISysManagerGroupDao.BaseResultMap">
+    <association property="manager" resultMap="com.std.persist.mysql.dao.ISysManagerDao.BaseResultMap" columnPrefix="m_" />
+  	<association property="group" resultMap="com.std.persist.mysql.dao.ISysGroupDao.BaseResultMap" columnPrefix="g_" /> 
+  </resultMap>
+  
+  <select id="getSysManagerGroupByPage" resultMap="BaseResultMap" parameterType="map">
+	select mg.*, 
+	m.n_id m_n_id, m.s_account m_s_account, m.s_mobile m_s_mobile, m.n_state m_n_state, m.d_create_date m_d_create_date, m.s_name m_s_name,
+	g.n_id g_n_id, g.s_name g_s_name, g.s_code g_s_code, g.n_state g_n_state, g.n_order_num g_n_order_num, g.n_parent_id g_n_parent_id
+	from `sys-manager-group` mg, `sys-manager` m, `sys-group` g
+	where mg.n_manager_id = m.n_id and mg.n_group_id = g.n_id
+    <if test="account != null">
+      and m.s_account LIKE CONCAT('%',#{account,jdbcType=VARCHAR}, '%')
+    </if>
+    <if test="name != null">
+      and m.s_name LIKE CONCAT('%',#{name,jdbcType=VARCHAR}, '%')
+    </if>
+    <if test="state != null">
+      and mg.n_state = #{state,jdbcType=INTEGER}
+    </if>
+    <if test="groupName != null">
+      and g.s_name LIKE CONCAT('%',#{groupName,jdbcType=VARCHAR}, '%')
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+</mapper>

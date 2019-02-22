@@ -1,0 +1,335 @@
+@test#$(84567.*!
+
+centos 6.5安装mysql 5.6.30
+
+查询系统中含有的有关mysql的软件
+rpm -qa | grep -i mysql  //grep -i是不分大小写字符查询，只要含有mysql就显示
+
+http://dev.mysql.com/downloads/mysql/下载
+MySQL-shared-compat-5.6.30-1.el6.x86_64.rpm
+MySQL-5.6.30-1.el6.x86_64.rpm-bundle.tar
+
+tar -xvf MySQL-5.6.30-1.el6.x86_64.rpm-bundle.tar
+
+
+rpm -i MySQL-shared-compat-5.6.30-1.el6.x86_64.rpm
+rpm -qa | grep -i mysql
+yum remove mysql-libs
+
+测试MySQL-server安装，提示需要安装perl：
+rpm -ivh --test MySQL-server-5.6.30-1.el6.x86_64.rpm
+yum install perl
+
+rpm -ivh MySQL-server-5.6.30-1.el6.x86_64.rpm
+rpm -ivh MySQL-client-5.6.30-1.el6.x86_64.rpm
+
+service mysql start
+
+vi /root/.mysql_secret
+## drlBovLZ2WcDjWJH
+
+全新安装设置的root密码在/root/.mysql_secret中，这是一个随机密码，
+你需要运行/usr/bin/mysql_secure_installation，删除anonymous用户。当然不建议用root用户来运行，rpm包已经建了一个mysql用户，可以使用这个用户
+
+/usr/bin/mysql_secure_installation --user=mysql
+
+	++++++++
+	
+	Enter current password for root (enter for none):    <–使用刚才得到的root的密码 NljqL63OYlGo5cqy
+	OK, successfully used password, moving on...
+	
+	Setting the root password ensures that nobody can log into the MySQL
+	root user without the proper authorisation.
+	
+	You already have a root password set, so you can safely answer 'n'.
+	
+	Change the root password? [Y/n] y   <– 是否更换root用户密码，输入y并回车，强烈建议更换
+	New password:      <– 设置root用户的密码
+	Re-enter new password:    <– 再输入一次你设置的密码
+	Password updated successfully!
+	Reloading privilege tables..
+	 ... Success!
+	
+	
+	By default, a MySQL installation has an anonymous user, allowing anyone
+	to log into MySQL without having to have a user account created for
+	them.  This is intended only for testing, and to make the installation
+	go a bit smoother.  You should remove them before moving into a
+	production environment.
+	
+	Remove anonymous users? [Y/n] y   <– 是否删除匿名用户,生产环境建议删除，所以输入y并回车
+	 ... Success!
+	
+	Normally, root should only be allowed to connect from 'localhost'.  This
+	ensures that someone cannot guess at the root password from the network.
+	
+	Disallow root login remotely? [Y/n] y    <–是否禁止root远程登录,根据自己的需求选择Y/n并回车,建议禁止
+	 ... Success!
+	
+	By default, MySQL comes with a database named 'test' that anyone can
+	access.  This is also intended only for testing, and should be removed
+	before moving into a production environment.
+	
+	Remove test database and access to it? [Y/n] y    <– 是否删除test数据库,输入y并回车
+	 - Dropping test database...
+	 ... Success!
+	 - Removing privileges on test database...
+	 ... Success!
+	
+	Reloading the privilege tables will ensure that all changes made so far
+	will take effect immediately.
+	
+	Reload privilege tables now? [Y/n] y   是否重新加载权限表，输入y并回车
+	 ... Success!
+	
+	
+	
+	
+	All done!  If you've completed all of the above steps, your MySQL
+	installation should now be secure.
+	
+	Thanks for using MySQL!
+	
+	
+	Cleaning up...
+	
+	++++++++
+至此，MySQL已经安装完成，最后看一下是否已将MySQL加到开机服务里：chkconfig
+
+mysql --help | grep my.cnf
+
+MySQL安装后涉及的目录如下：
+目录 	目录中的内容
+/usr/bin 	客户端程序和脚本
+/usr/sbin 	Mysqld服务器
+/var/lib/mysql 	数据库的日志文件
+/usr/share/info 	信息格式手册
+/usr/share/man 	Unix 手册页
+/usr/include/mysql 	包括 （标题） 的文件
+/usr/lib/mysql 	mysql的lib包
+/usr/share/mysql 	杂项的支持文件，包括错误消息） 字符设置的文件，示例配置文件，SQL 数据库安装
+/usr/share/sql-bench 	基准
+
+show VARIABLES like '%max_allowed_packet%';
+
+    #一定要在这个服务器端下面配置（否则不会生效），说多了都是眼泪！  
+    [mysqld]    
+performance_schema_max_table_instances=600
+table_definition_cache=400
+table_open_cache=256
+character-set-server=utf8
+character_set_client=utf8
+max_allowed_packet = 20M
+
+
+===========================================new=====================================================
+通过yum来进行mysql的安装
+命令来查看yum上提供的mysql数据库可下载的版本
+yum list | grep mysql
+
+安装命令
+yum install -y mysql-server mysql mysql-devel
+
+查看刚安装好的mysql-server的版本
+rpm -qi mysql-server
+
+启动
+ service mysqld start
+
+ chkconfig mysqld on 命令来将其设置成开机启动
+
+ /usr/bin/mysqladmin -u root password 'new-password'　　// 为root账号设置密码
+ mysqladmin -u root password '123456'　　// 通过该命令给root账号设置密码为 123456
+
+mysql数据库的主要配置文件
+1./etc/my.cnf 这是mysql的主配置文件
+2./var/lib/mysql   mysql数据库的数据库文件存放位置
+3./var/log mysql数据库的日志输出存放位置
+	其中mysqld.log 这个文件就是我们存放我们跟mysql数据库进行操作而产生的一些日志信息，通过查看该日志文件，我们可以从中获得很多信息
+因为我们的mysql数据库是可以通过网络访问的，并不是一个单机版数据库，其中使用的协议是 tcp/ip 协议，我们都知道mysql数据库绑定的端口号是 3306 ，所以我们可以通过 netstat -anp 命令来查看一下，Linux系统是否在监听 3306 这个端口号：
+
+===========================================new=====================================================
+
+tar -xvf MySQL-5.6.28-1.linux_glibc2.5.x86_64.rpm-bundle.tar -C /usr/local/soft/MySQL
+
+{
+	1、查看系统是否安装了MySQL
+	     rpm -qa | grep mysql 
+
+	2、卸载已安装的MySQL
+	     卸载mysql命令如下：
+	     rpm -e --nodeps  mysql-libs-5.1.61-4.el6.x86_64
+	     要将 /var/lib/mysql文件夹下的所有文件都删除干净
+
+	3、安装新的MySQL
+	     rpm -ivh MySQL-server-5.6.28-1.linux_glibc2.5.x86_64.rpm
+	     rpm -ivh MySQL-client-5.6.28-1.linux_glibc2.5.x86_64.rpm
+	     rpm -ivh MySQL-devel-5.6.28-1.linux_glibc2.5.x86_64.rpm
+	修改配置文件位置
+	 cp /usr/share/mysql/my-default.cnf /etc/my.cnf
+
+	4、启动MySQL服务
+	     方法一：重新启动系统
+	     方法二：#service mysql start
+	   
+	     查看MySQL运行状态的方法：
+	     使用命令：# /etc/rc.d/init.d/mysql status
+	     结果：   显示 “SUCCESS” 则已经运行
+		      显示 “FAILED”  则没有运行
+
+	MySQL服务一些其他命令
+	       a、察看mysql是否在自动启动列表：  #　/sbin/chkconfig –list
+	       b、添加mysql到系统自启动服务组：  #　/sbin/chkconfig　– add　mysql
+	       c、把mysql从启动服务组中删除：      #　/sbin/chkconfig　– del　mysql  
+	       d、停止mysql服务：                           #  service mysql stop
+	       e、脚本启动mysql服务：                    #  /etc/rc.d/init.d/mysqld start  
+	       f、脚本停止mysql服务：                     #  /etc/rc.d/init.d/mysqld stop
+	5、安装完成之后为MySQL设置root密码。
+	   命令如下：
+
+	# mysql -u root -p
+
+	会提示输入密码，初始root密码保存在'/root/.mysql_secret'文件中
+
+	接着输入mysql>SET PASSWORD = PASSWORD('123456');
+
+	6、mysql安装目录说明
+	   /var/lib/mysql              数据库文件
+	   /usr/share/mysql         命令及配置文件
+	   /usr/bin(mysqladmin、mysqldump等命令)
+
+	7、linux 下安装的mysql表名是区分大小写的，如果要不区分大小写，可以采用以下方式
+	   1、拷贝 /usr/share/mysql/my-huge.cnf 到 /etc/my.cnf（如果已有该文件可以直接修改）
+		 命令如下：# cp /usr/share/mysql/my-huge.cnf  /etc/my.cnf
+	   2、修改my.cnf 文件
+		在 [mysqld]下增加
+		lower_case_table_names=1 #表名全部为小写，避免出现大小写敏感
+
+	   3、重启mysql
+		# service mysql restart
+
+	8(可选)、为连接MySQL的主机分配权限：
+	   命令如下：
+	   >mysql GRANT SELECT,INSERT,UPDATE,DELETE ON *.* TO root@xxx.xxx.x.xx identified by '123456'; //xxx.xxx.x.xx是你的IP
+
+	9、开机启动MySQL
+
+	用root用户登录终端
+
+	查看是否已经有MySQL的服务
+	chkconfig --list | grep mysql
+
+	#chkconfig --list
+
+	如果没有MySQL(如果有请忽略这个步骤)
+
+	#chkconfig --add mysql
+
+	设置开机启动mysql服务
+
+	#chkconfig mysql on
+
+
+	10(可选)、更改MySQL默认字符集 (默认字符集和操作系统字符集一样，所以不需要设置)
+	   查看mysql字符集：mysql> show variables like 'character_set_%';
+
+
+	检测字符集问题的一些手段
+	    • SHOW CHARACTER SET;
+	    • SHOW COLLATION;
+	    • SHOW VARIABLES LIKE 'character%';
+	    • SHOW VARIABLES LIKE 'collation%';
+	    • SQL函数HEX、LENGTH、CHAR_LENGTH
+	    • SQL函数CHARSET、COLLATION
+
+	• 系统变量：
+	– character_set_server：默认的内部操作字符集
+	– character_set_client：客户端来源数据使用的字符集
+	– character_set_connection：连接层字符集
+	– character_set_results：查询结果字符集
+	– character_set_database：当前选中数据库的默认字符集
+	– character_set_system：系统元数据(字段名等)字符集
+	– 还有以collation_开头的同上面对应的变量，用来描述字符序。
+
+	修改默认字符集
+	(1) 最简单的修改方法，就是修改mysql的my.ini文件中的字符集键值，
+	     如    default-character-set = utf8
+	      character_set_server =  utf8
+	     修改完后，重启mysql的服务
+	(2) 还有一种修改字符集的方法，就是使用mysql的命令
+	     mysql> SET character_set_client = utf8 ;
+	     mysql> SET character_set_connection = utf8 ;
+	     mysql> SET character_set_database = utf8 ;
+	     mysql> SET character_set_results = utf8 ;
+	     mysql> SET character_set_server = utf8 ;
+	     mysql> SET collation_connection = utf8 ;
+	     mysql> SET collation_database = utf8 ;
+	     mysql> SET collation_server = utf8 ;
+	 
+	     设置了表的默认字符集为utf8并且通过UTF-8编码发送查询，存入数据库的仍然是乱码。那connection连接层上可能出了问题。解决方法是在发送查询前执行一下下面这句： SET NAMES 'utf8';它相当于下面的三句指令：
+	     SET character_set_client = utf8;
+	     SET character_set_results = utf8;
+	     SET character_set_connection = utf8;
+
+
+	允许远程登陆
+	01
+		mysql> use mysql;
+	02
+		mysql> select host,user,password from user;
+	03
+		+-----------------------+------+-------------------------------------------+
+	04
+		| host                  | user | password                                  |
+	05
+		+-----------------------+------+-------------------------------------------+
+	06
+		| localhost             | root | *6BB4837EB74329105EE4568DDA7DC67ED2CA2AD9 |
+	07
+		| localhost.localdomain | root | *1237E2CE819C427B0D8174456DD83C47480D37E8 |
+	08
+		| 127.0.0.1             | root | *1237E2CE819C427B0D8174456DD83C47480D37E8 |
+	09
+		| ::1                   | root | *1237E2CE819C427B0D8174456DD83C47480D37E8 |
+	10
+		+-----------------------+------+-------------------------------------------+
+	11
+		 
+	12
+		mysql> update user set password=password('@test#$(84567.*!') where user='root';
+	13
+		mysql> update user set host='%' where user='root' and host='localhost';
+	14
+		mysql> flush privileges;
+
+	update user set host='localhost' where user='mysqld' or user='server';
+
+	 配置/etc/my.cnf文件,修改数据存放路径、mysql.sock路径以及默认编码utf-8.
+	my.cnf
+
+	[client]
+	password        = 123456
+	port            = 3306
+	default-character-set=utf8
+	[mysqld]
+	port            = 3306
+	character_set_server=utf8
+	character_set_client=utf8
+	collation-server=utf8_general_ci
+	#(注意linux下mysql安装完后是默认：表名区分大小写，列名不区分大小写； 0：区分大小写，1：不区分大小写)
+	lower_case_table_names=1
+	#(设置最大连接数，默认为 151，MySQL服务器允许的最大连接数16384; )
+	max_connections=1000
+	[mysql]
+	default-character-set = utf8
+
+
+	vi /usr/my.cnf
+
+	character-set-server=utf8
+
+ }
+
+
+
+

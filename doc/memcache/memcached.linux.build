@@ -1,0 +1,35 @@
+tar -zxvf libevent-2.0.22-stable.tar.gz
+./configure -prefix=/usr/local/resources/soft/libevent
+make && make install
+
+tar -zxvf memcached-1.4.25.tar.gz
+./configure -prefix=/usr/local/resources/soft/memcached --with-libevent=/usr/local/resources/soft/libevent --enable-64bit --enable-threads   
+make && make install
+
+注意：默认memcached单个进程只支持到2G内存，需要更大内存支持的话，需要打开64位支持，编译的时候加参数：
+--enable-64bit
+
+测试memcached是否安装成功： 
+
+ls -al /usr/local/resources/soft/memcached/bin/memcached
+
+配置
+1. 创建启动用户memcached： 
+
+groupadd memcached
+useradd -g memcached memcached
+
+2. 创建PID进程目录： 
+
+cd /var/run   
+mkdir memcached   
+chown -R memcached:memcached memcached/
+
+修改 /etc/profile  最后添加一行
+export PATH=/usr/local/resources/soft/memcached/bin:$PATH
+//重启
+source /etc/profile
+
+memcached -d -m 200 -u root -l 127.0.0.1 -p 11211 -c 1024 -P /var/run/memcached/memcached.pid
+
+  

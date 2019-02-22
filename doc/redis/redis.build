@@ -1,0 +1,15 @@
+安装redis4.0.12
+配置文件及rdb文件：
+    redis.10210.conf
+
+tar -zxvf redis-4.0.12.tar.gz 
+cd redis-4.0.12
+make
+make PREFIX=/usr/local install
+
+redis-server /usr/redis/redis.10210.conf
+
+redis-cli -h 127.0.0.1 -p 10210
+auth 
+
+shutdown nosave

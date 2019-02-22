@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration debug="true">
+	<!-- 应用名称：和统一配置中的项目代码保持一致（小写） -->
+	<property name="PROJECT_NAME" value="std" />
+	<!--日志文件保留天数 -->
+	<property name="LOG_MAX_HISTORY" value="180" />
+	<!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径 -->
+	<!--应用日志文件保存路径 -->
+	<property name="LOG_HOME" value="/usr/logs" />
+	
+	<!-- 控制台输出 -->
+	<appender name="stdout.log" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %t %logger{0}:%L - %msg%n</pattern>
+		</encoder>
+	</appender>
+	<!-- 按照每天生成日志文件：主项目日志 -->
+    <appender name="main.log" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${LOG_HOME}/${PROJECT_NAME}.%d{yyyy-MM-dd}.log</FileNamePattern>
+            <MaxHistory>${LOG_MAX_HISTORY}</MaxHistory>
+        </rollingPolicy>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %t %logger{0}:%L - %msg%n
+            </Pattern>
+        </layout>
+    </appender>
+	<root level="DEBUG">
+		<appender-ref ref="stdout.log"/>
+		<appender-ref ref="main.log"/>
+	</root>
+</configuration>
