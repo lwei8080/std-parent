@@ -37,7 +37,6 @@ public class StdPersistTest {
 		for(SysManager m : managers) {
 			logger.info("{}", ReflectionToStringBuilder.toString(m));
 		}
-		
 	}
 
 }
